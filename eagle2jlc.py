@@ -1,12 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from os.path import expanduser, sep, dirname, abspath
+from os.path import dirname, abspath
 from argparse import ArgumentParser
 import xml.etree.ElementTree as ET
 import xlsxwriter
 import requests
-import time
 import re
 import json
 
