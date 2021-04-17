@@ -119,6 +119,7 @@ if __name__ == '__main__':
 
 # Part numbers
     missing = list()
+    bom = list()
     for c, v in compos.items():
         value = c[0].upper()
         package = c[1].upper()
@@ -163,7 +164,6 @@ if __name__ == '__main__':
             post_data = {'keyword': keyword,
                          'currentPage': '1', 'pageSize': '40'}
             r = requests.post(API, json=post_data, headers={'content-type': 'application/json'})
-            jlc_compos = r.json()
             jlc_compos = r.json()['data']['list']
 
         found = False
@@ -181,7 +181,6 @@ if __name__ == '__main__':
         # Skip the rest if we are in strict matching mode or already found it using part code
         if not args.match and not found:
             for entry in jlc_compos:
-
                 if desc == 'RESISTOR' and value.endswith('R'):
                     value = value.replace('R', 'OHM')
                 elif desc == 'RESISTOR':
@@ -206,12 +205,16 @@ if __name__ == '__main__':
                     break
 
         if v['jlc']['code']:
-            print(sorted(names), v['jlc'])
+            bom.append((sorted(names), v['jlc']))
         else:
             missing.append(sorted(names))
 
+    print('Found parts:')
+    for part in sorted(bom):
+        print(part)
+
     print('Missing parts:')
-    for m in missing:
+    for m in sorted(missing):
         print(m)
 
 # BOM
