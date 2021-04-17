@@ -108,6 +108,38 @@ if __name__ == '__main__':
             continue
         pos = (component.attrib['x'], component.attrib['y'])
         layer = 'Top'
+
+        # Trim R/C/L
+        if re.search(r'^C\d{4,5}', package, re.M):
+            package = package[1:]
+            desc = 'CAPACITOR'
+        elif re.search(r'^R\d{4,5}', package, re.M):
+            package = package[1:]
+            desc = 'RESISTOR'
+            if re.search(r'\d+R(\s\d%|$)', value, re.M):
+                value = value.replace('R', 'OHM')
+            elif re.search(r'\d+R\d+', value, re.M):
+                value = value.replace('R', '.')
+            else:
+                value += 'OHM'
+        elif re.search(r'^L\d{4,5}', package, re.M):
+            package = package[1:]
+            desc = 'INDUCTOR'
+        elif re.search(r'^SOT-?\d{2,3}(-\d)?$', package, re.M):
+            if re.search(r'SOT\d{2,3}', package, re.M):
+                package = package.replace('SOT', 'SOT-')
+        elif re.search(r'^(DO-?\d{3}.+|SM[ABC])$', package, re.M):
+            desc = 'DIODE'
+        elif len(package) < 8:
+            pass
+        else:
+            package = ''  # Ignore most packages as they are too specific, see below
+            m = re.search(r'^.*LED.*\d{4,5}', package, re.M)
+            if m:
+                package = m.group(1)
+                desc = 'LED'
+
+
         index = (value, package, lcsc_pn)
 
         rot = component.attrib.get('rot', 'R0')
@@ -118,8 +150,7 @@ if __name__ == '__main__':
 
         # Fix rotation
         rot = int(rot) + 180
-        if rot > 360:
-            rot -= 360
+        rot %= 360
 
         if layer != 'Top':
             continue
@@ -137,23 +168,6 @@ if __name__ == '__main__':
         package = c[1]
         lcscpn = c[2]
         desc = ''
-        # Trim R/C/L
-        if re.search(r'^C\d{4,5}', package, re.M):
-            package = package[1:]
-            desc = 'CAPACITOR'
-        elif re.search(r'^R\d{4,5}', package, re.M):
-            package = package[1:]
-            desc = 'RESISTOR'
-        elif re.search(r'^L\d{4,5}', package, re.M):
-            package = package[1:]
-            desc = 'INDUCTOR'
-        else:
-            package = ''  # Ignore most packages as they are too specific, see below
-            m = re.search(r'^.*LED.*\d{4,5}', package, re.M)
-            if m:
-                package = m.group(1)
-                desc = 'LED'
-
         names = []
         for n in v['parts']:
             names.append(n[0])
@@ -193,10 +207,6 @@ if __name__ == '__main__':
         # Skip the rest if we are in strict matching mode or already found it using part code
         if not args.match and not found:
             for entry in jlc_compos:
-                if desc == 'RESISTOR' and value.endswith('R'):
-                    value = value.replace('R', 'OHM')
-                elif desc == 'RESISTOR':
-                    value = value.replace('R', '.')
                 # Ignore if the required quantity isn't available
                 if entry['stockCount'] < len(names) and args.nostock == False:
                     continue
