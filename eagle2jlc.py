@@ -24,6 +24,8 @@ parser.add_argument('-m', '--match', action='store_true',
                     help='Only use LCSC# attribute')
 parser.add_argument('-n', '--nostock', action='store_true',
                     help='Select part even if no stock')
+parser.add_argument('-i', '--ignore', type=str,
+                    help='Ignored parts (regex)')
 
 DB_FILE = 'jlcdb.json.gz'
 
@@ -97,6 +99,11 @@ if __name__ == '__main__':
         package = component.attrib['package'].strip().upper()
         lcsc_prop = component.find(".//attribute[@name='LCSC#']")
         lcsc_pn = ''
+
+        if args.ignore and re.match(args.ignore, name):
+            print('Ignoring part:', name)
+            continue
+
         if lcsc_prop != None:
             lcsc_pn = lcsc_prop.attrib.get('value', '').strip().upper()
         pos = (component.attrib['x'], component.attrib['y'])
