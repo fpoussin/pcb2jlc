@@ -192,8 +192,12 @@ if __name__ == '__main__':
                     continue
                 if package and package not in entry['describe'] and package != entry['componentSpecificationEn'].upper():
                     continue
-                if value.upper() not in entry['describe'].upper() \
-                        and value.upper().strip() not in entry['componentModelEn'].upper():
+                all_words_found = True
+                for word in value.strip().upper().split(' '):
+                    if word not in entry['describe'].upper():
+                        all_words_found = False
+                        break
+                if not all_words_found and value.upper().strip() not in entry['componentModelEn'].upper():
                     continue
 
                 v['jlc']['desc'] = entry['describe']
