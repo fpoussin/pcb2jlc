@@ -121,9 +121,9 @@ if __name__ == '__main__':
     missing = list()
     bom = list()
     for c, v in compos.items():
-        value = c[0].upper()
-        package = c[1].upper()
-        lcscpn = c[2].upper()
+        value = c[0]
+        package = c[1]
+        lcscpn = c[2]
         desc = ''
         # Trim R/C/L
         if re.search(r'^C\d{4,5}', package, re.M):
@@ -158,7 +158,7 @@ if __name__ == '__main__':
                 keyword += '{}'.format(value)
             keyword = keyword.strip()
 
-            if not keyword.strip():
+            if not keyword:
                 continue
 
             post_data = {'keyword': keyword,
@@ -193,11 +193,11 @@ if __name__ == '__main__':
                 if package and package not in entry['describe'] and package != entry['componentSpecificationEn'].upper():
                     continue
                 all_words_found = True
-                for word in value.strip().upper().split(' '):
+                for word in value.split(' '):
                     if word not in entry['describe'].upper():
                         all_words_found = False
                         break
-                if not all_words_found and value.upper().strip() not in entry['componentModelEn'].upper():
+                if not all_words_found and value not in entry['componentModelEn'].upper():
                     continue
 
                 v['jlc']['desc'] = entry['describe']
