@@ -100,12 +100,12 @@ if __name__ == '__main__':
         lcsc_prop = component.find(".//attribute[@name='LCSC#']")
         lcsc_pn = ''
 
-        if args.ignore and re.match(args.ignore, name):
-            print('Ignoring part:', name)
-            continue
-
         if lcsc_prop != None:
             lcsc_pn = lcsc_prop.attrib.get('value', '').strip().upper()
+
+        if not lcsc_pn and args.ignore and re.match(args.ignore, name):
+            print('Ignoring part:', name)
+            continue
         pos = (component.attrib['x'], component.attrib['y'])
         layer = 'Top'
         index = (value, package, lcsc_pn)
@@ -115,6 +115,11 @@ if __name__ == '__main__':
             layer = 'Bottom'
             rot = rot[1:]  # Remove M
         rot = rot[1:]  # Remove R
+
+        # Fix rotation
+        rot = int(rot) + 180
+        if rot > 360:
+            rot -= 360
 
         if layer != 'Top':
             continue
