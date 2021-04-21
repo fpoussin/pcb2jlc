@@ -17,9 +17,9 @@ parser = ArgumentParser(
     description='Generate JLCPCB bom and cpl files from an eagle project')
 parser.add_argument('project', type=str, help='Eagle board file')
 parser.add_argument('-u', '--update', action='store_true',
-                    help='Update JLCPCB component cache')
-parser.add_argument('-o', '--online', action='store_true',
-                    help='Query JLCPCB for each component (cache not used)')
+                    help='Update JLCPCB component database')
+parser.add_argument('-o', '--offline', action='store_true',
+                    help='Use offline database')
 parser.add_argument('-m', '--match', action='store_true',
                     help='Only use LCSC# attribute')
 parser.add_argument('-n', '--nostock', action='store_true',
@@ -46,7 +46,12 @@ if __name__ == '__main__':
     board = ET.parse('{}'.format(args.project))
     jlc_compos = []
 
-    if args.update and not args.online:
+    if args.offline:
+        print('Using offline mode')
+    else:
+        print('Using online mode')
+
+    if args.update and args.offline:
         print('Downloading components list...')
 
         step = 100
@@ -54,11 +59,14 @@ if __name__ == '__main__':
         if r.status_code == 200:
             categories = r.json()
             for category in categories:
+                cat_data = []
+                print('Importing', category['sortName'])
                 for subcategory in category['childSortList']:
                     # Download a list of all components
                     subCategoryName = subcategory['sortName']
-                    print('Importing', subCategoryName)
+                    print('- {}... '.format(subCategoryName), end='', flush=True)
                     page = 0
+                    subcat_data = []
                     while True:
                         r = requests.post(API, json={'currentPage': page, 'pageSize': step, 'searchSource': 'search', 'firstSortName': '', 'secondeSortName': subCategoryName})
                         if r.status_code == 200:
@@ -66,26 +74,32 @@ if __name__ == '__main__':
                                 data = r.json()['data']['list']
                                 data_len = len(data)
                                 if data_len:
-                                    jlc_compos += data
+                                    for part in data:
+                                        if not len(part['componentPrices']):
+                                            part['componentPrices'] = [{'productPrice': 0}]
+                                    subcat_data += data
                                     if data_len < step:
-                                        print('{0}: Total {1}'.format(subCategoryName, (page*step) + data_len))
                                         break
                                     page += 1
-                                    time.sleep(0.2)
+                                    time.sleep(0.1)
                                 else:
                                     break
                             except Exception as e:
                                 print(e)
                                 print(r.text)
                                 break
+                    print(len(subcat_data))
+                    cat_data += subcat_data
+                print('Total', len(cat_data), '\n\r')
+                jlc_compos += sorted(cat_data, key=lambda x: x['componentPrices'][0]['productPrice'])
         else:
             print('Update failed')
             exit(1)
 
-        with gzip.open(DB_FILE, 'wb') as f:
-            json.dump(jlc_compos, f, indent=2)
-    elif not args.online:
-        with gzip.open(DB_FILE, 'rb') as f:
+        with gzip.open(DB_FILE, 'w') as f:
+            f.write(json.dumps(jlc_compos, indent=2).encode('utf-8'))
+    elif args.offline:
+        with gzip.open(DB_FILE, 'r') as f:
             jlc_compos = json.load(f)
             print('loaded {0} components from cache'.format(len(jlc_compos)))
 
@@ -172,7 +186,7 @@ if __name__ == '__main__':
         for n in v['parts']:
             names.append(n[0])
 
-        if args.online:
+        if not args.offline:
             if lcscpn:
                 keyword = lcscpn
             else:
@@ -190,7 +204,7 @@ if __name__ == '__main__':
             post_data = {'keyword': keyword,
                          'currentPage': '1', 'pageSize': '40'}
             r = requests.post(API, json=post_data, headers={'content-type': 'application/json'})
-            jlc_compos = r.json()['data']['list']
+            jlc_compos = sorted(r.json()['data']['list'], key=lambda x: x['componentPrices'][0]['productPrice'])
 
         found = False
         for entry in jlc_compos:
@@ -201,6 +215,7 @@ if __name__ == '__main__':
                 v['jlc']['basic'] = entry['componentLibraryType'] == 'base'
                 v['jlc']['package'] = entry['componentSpecificationEn']
                 v['jlc']['partName'] = entry['componentModelEn']
+                v['jlc']['unitPrice'] = entry['componentPrices'][0]['productPrice']
                 found = True
                 break
 
@@ -227,6 +242,7 @@ if __name__ == '__main__':
                 v['jlc']['basic'] = entry['componentLibraryType'] == 'base'
                 v['jlc']['package'] = entry['componentSpecificationEn']
                 v['jlc']['partName'] = entry['componentModelEn']
+                v['jlc']['unitPrice'] = entry['componentPrices'][0]['productPrice']
                 if v['jlc']['basic']:  # We have found a matching "basic" part, skip the rest
                     break
 
