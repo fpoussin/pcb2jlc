@@ -106,19 +106,24 @@ if __name__ == '__main__':
     for l in board.iter('layer'):
         layers[l.attrib['number']] = l.attrib['name']
 
+    ignored_parts = []
     for component in board.iter('element'):
-
         value = component.attrib['value'].strip().upper()
         name = component.attrib['name'].strip().upper()
         package = component.attrib['package'].strip().upper()
         lcsc_prop = component.find(".//attribute[@name='LCSC#']")
         lcsc_pn = ''
+        rot_prop = component.find(".//attribute[@name='ROT']")
+        rot_offset = 0
 
         if lcsc_prop != None:
             lcsc_pn = lcsc_prop.attrib.get('value', '').strip().upper()
 
-        if not lcsc_pn and args.ignore and re.match(args.ignore, name):
-            print('Ignoring part:', name)
+        if rot_prop != None:
+            rot_offset = int(rot_prop.attrib.get('value', '').strip())
+
+        if (not lcsc_pn and args.ignore and re.match(args.ignore, name)) or re.match('^N[CBP]$', value):
+            ignored_parts.append(name)
             continue
         pos = (component.attrib['x'], component.attrib['y'])
         layer = 'Top'
@@ -163,7 +168,7 @@ if __name__ == '__main__':
         rot = rot[1:]  # Remove R
 
         # Fix rotation
-        rot = int(rot) + 180
+        rot = int(rot) + 180 + rot_offset
         rot %= 360
 
         if layer != 'Top':
@@ -173,6 +178,8 @@ if __name__ == '__main__':
             compos[index] = {'parts': [], 'jlc':
                              {'desc': '', 'basic': False, 'code': '', 'package': '', 'partName': ''}}
         compos[index]['parts'].append((name, layer, pos, rot))
+
+    print('Ignored parts:', ignored_parts)
 
 # Part numbers
     missing = list()
