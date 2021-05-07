@@ -136,11 +136,12 @@ if __name__ == '__main__':
             package = package[1:]
             desc = 'RESISTOR'
             if re.search(r'\d+R(\s\d%|$)', value, re.M):
-                value = value.replace('R', 'OHM')
+                value = value.replace('R', 'Ω')
             elif re.search(r'\d+R\d+', value, re.M):
                 value = value.replace('R', '.')
             else:
-                value += 'OHM'
+                pass
+                #value += 'OHM'
         elif re.search(r'^L\d{4,5}', package, re.M):
             package = package[1:]
             desc = 'INDUCTOR'
@@ -179,7 +180,7 @@ if __name__ == '__main__':
                              {'desc': '', 'basic': False, 'code': '', 'package': '', 'partName': ''}}
         compos[index]['parts'].append((name, layer, pos, rot))
 
-    print('Ignored parts:', ignored_parts)
+    print('Ignored parts:', sorted(ignored_parts))
 
 # Part numbers
     missing = list()
@@ -211,7 +212,12 @@ if __name__ == '__main__':
             post_data = {'keyword': keyword,
                          'currentPage': '1', 'pageSize': '40'}
             r = requests.post(API, json=post_data, headers={'content-type': 'application/json'})
-            jlc_compos = sorted(r.json()['data']['list'], key=lambda x: x['componentPrices'][0]['productPrice'])
+            r_data = []
+            for part in r.json()['data']['list']:
+              if not len(part['componentPrices']):
+                part['componentPrices'] = [{'productPrice': 0}]
+            r_data.append(part)
+            jlc_compos = sorted(r_data, key=lambda x: x['componentPrices'][0]['productPrice'])
 
         found = False
         for entry in jlc_compos:
@@ -256,7 +262,7 @@ if __name__ == '__main__':
         if v['jlc']['code']:
             bom.append((sorted(names), v['jlc']))
         else:
-            missing.append(sorted(names))
+            missing.append((sorted(names), value))
 
     print('Found parts:')
     for part in sorted(bom):
