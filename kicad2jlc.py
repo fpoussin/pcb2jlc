@@ -6,7 +6,7 @@ from lib import *
 
 
 parser = ArgumentParser(
-    description='Generate JLCPCB bom and cpl files from an eagle project')
+    description='Generate JLCPCB bom and cpl files from a Kicad PCB project')
 parser.add_argument('project', type=str, help='Kicad PCB board file')
 parser.add_argument('-u', '--update', action='store_true',
                     help='Update JLCPCB component database')
@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
     for layer in ('F.Cu', 'B.Cu'):
         components = kicad.get_components(args.project, layer, args.ignore)
-        parts = jlc.search(components, database=db)
+        parts = jlc.search(components, database=db, nostock=args.nostock, match=args.match)
         
-        jlc.make_bom(parts, layer+'-bom.xlsx')
-        jlc.make_cpl(parts, layer+'-cpl.xlsx')
+        jlc.make_bom(parts, layer + '-bom.xlsx')
+        jlc.make_cpl(parts, layer + '-cpl.xlsx')

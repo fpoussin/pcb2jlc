@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
     for layer in ('Top', 'Bottom'):
         components = eagle.get_components(args.project, layer, args.ignore)
-        parts = jlc.search(components, database=db)
+        parts = jlc.search(components, database=db, nostock=args.nostock, match=args.match)
         
-        jlc.make_bom(parts, layer+'-bom.xlsx')
-        jlc.make_cpl(parts, layer+'-cpl.xlsx')
+        jlc.make_bom(parts, layer + '-bom.xlsx')
+        jlc.make_cpl(parts, layer + '-cpl.xlsx')

@@ -106,6 +106,9 @@ def get_components(path, layer, ignore=None):
                 p = [x.replace('"', '') for x in p]
                 if 'LCSC' in p[0].upper():
                     lcsc_pn = p[1]
+                elif 'ROT' in p[0].upper():
+                    rot += int(p[1])
+                    rot %= 360
 
             if (not lcsc_pn and ignore and re.match(ignore, name)) or re.match('^N[CBP]$', value):
                 ignored_parts.append(name)

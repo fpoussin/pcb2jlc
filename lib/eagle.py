@@ -63,7 +63,6 @@ def get_components(path, layer, ignore=None):
                 package = m.group(1)
                 desc = 'LED'
 
-
         index = (value, package, lcsc_pn)
 
         rot = component.attrib.get('rot', 'R0')

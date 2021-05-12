@@ -9,7 +9,7 @@ Currently supports:
 These scripts will query the JLC online database for each part, checking stock and sorting by cheapest price.  
 It can also save the whole database locally for faster generation if your connection is slow.  
 
-You can add the *LCSC* property to your components to specify a part number.
+You can add the `LCSC` property to your components to specify a part number.  
 By default, package, value and type will be used to search for a part.  
 
-You can offset the rotation of a part with the *ROT* property. 
+You can offset the rotation of a part with the `ROT` property. 
