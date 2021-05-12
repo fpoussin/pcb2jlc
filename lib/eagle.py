@@ -18,7 +18,7 @@ def get_components(path, layer, ignore=None):
         value = component.attrib['value'].strip().upper()
         name = component.attrib['name'].strip().upper()
         package = component.attrib['package'].strip().upper()
-        lcsc_prop = component.find(".//attribute[@name='LCSC#']")
+        lcsc_prop = component.find(".//attribute[@name='LCSC']")
         lcsc_pn = ''
         rot_prop = component.find(".//attribute[@name='ROT']")
         rot_offset = 0
