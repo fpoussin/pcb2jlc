@@ -90,11 +90,13 @@ def get_components(path, layer, ignore=None):
     compos = {}
     ignored_parts = []
     for footprint in pcb.footprint:
-        # print(footprint)
         if footprint.layer.replace('"', '') == layer:
             package = footprint[0].replace('"', '')
             pos = footprint.at[0:2]
-            rot = footprint.at[-1]
+            if len(footprint.at) == 3:
+                rot = footprint.at[2]
+            else:
+                rot = 0
             lcsc_pn = ''
             for p in footprint.fp_text:
                 for idx in [x for x in p if type(x) is int]:
@@ -160,6 +162,6 @@ def get_components(path, layer, ignore=None):
                 if index not in compos:
                     compos[index] = {'parts': [], 'jlc':
                                     {'desc': '', 'basic': False, 'code': '', 'package': '', 'partName': ''}}
-                compos[index]['parts'].append((name, layer, str(pos), str(rot)))
+                compos[index]['parts'].append((name, layer, pos, str(rot)))
 
     return compos

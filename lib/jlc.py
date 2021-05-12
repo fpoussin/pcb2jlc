@@ -245,8 +245,8 @@ def make_cpl(parts, path='cpm.xlsx'):
         for n in data['parts']:
 
             cpl.write('A'+str(line), n[0])
-            cpl.write('B'+str(line), n[2][0]+'mm')
-            cpl.write('C'+str(line), n[2][1]+'mm')
+            cpl.write('B'+str(line), str(n[2][0])+'mm')
+            cpl.write('C'+str(line), str(n[2][1])+'mm')
             cpl.write('D'+str(line), n[1])
             cpl.write('E'+str(line), n[3])
             line += 1
