@@ -138,8 +138,6 @@ def get_components(path, layer, ignore=None):
                     value = value.replace('R', 'Ω')
                 elif re.search(r'\d+R\d+', value, re.M):
                     value = value.replace('R', '.')
-                else:
-                    value += 'Ω'
             elif re.search(r'^Inductor.*L_.*\d{4}', package, re.M):
                 m = re.search(r'^Inductor.*L_.*(\d{4})', package, re.M)
                 if m:
