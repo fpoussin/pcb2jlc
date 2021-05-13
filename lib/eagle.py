@@ -33,7 +33,7 @@ def get_components(path, layer, ignore=None):
             ignored_parts.append(name)
             continue
         pos = (component.attrib['x'], component.attrib['y'])
-        cpn_layer = 'Top'
+        cpn_layer = 'top'
 
         # Trim R/C/L
         if re.search(r'^C\d{4,5}', package, re.M):
@@ -67,7 +67,7 @@ def get_components(path, layer, ignore=None):
 
         rot = component.attrib.get('rot', 'R0')
         if rot.startswith('MR'):
-            cpn_layer = 'Bottom'
+            cpn_layer = 'bottom'
             rot = rot[1:]  # Remove M
         rot = rot[1:]  # Remove R
 

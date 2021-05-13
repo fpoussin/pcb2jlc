@@ -30,7 +30,7 @@ if __name__ == '__main__':
     if args.offline:
         db = jlc.load_db()
 
-    for layer in ('Top', 'Bottom'):
+    for layer in ('top', 'bottom'):
         components = eagle.get_components(args.project, layer, args.ignore)
         parts = jlc.search(components, database=db, nostock=args.nostock, match=args.match)
         

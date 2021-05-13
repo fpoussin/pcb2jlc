@@ -87,10 +87,10 @@ def get_components(path, layer, ignore=None):
     for e in pcb.getError():
         print('Error: {}'.format(e))
 
-    if layer == 'F.Cu':
-        cpl_layer = 'top'
-    elif layer == 'B.Cu':
-        cpl_layer = 'bottom'
+    if layer == 'top':
+        kicad_layer = 'F.Cu'
+    elif layer == 'bottom':
+        kicad_layer = 'B.Cu'
     else:
         print('Unkown layer')
         exit(1)
@@ -98,9 +98,9 @@ def get_components(path, layer, ignore=None):
     compos = {}
     ignored_parts = []
     for footprint in pcb.footprint:
-        if footprint.layer.replace('"', '') == layer:
+        if footprint.layer.replace('"', '') == kicad_layer:
             package = footprint[0].replace('"', '')
-            if cpl_layer == 'top':
+            if layer == 'top':
                 pos = (footprint.at[0], -footprint.at[1])
             else:
                 pos = (-footprint.at[0], -footprint.at[1])
@@ -173,6 +173,6 @@ def get_components(path, layer, ignore=None):
                 if index not in compos:
                     compos[index] = {'parts': [], 'jlc':
                                     {'desc': '', 'basic': False, 'code': '', 'package': '', 'partName': ''}}
-                compos[index]['parts'].append((name, cpl_layer, pos, str(rot)))
+                compos[index]['parts'].append((name, layer, pos, str(rot)))
 
     return compos
