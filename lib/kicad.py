@@ -100,7 +100,7 @@ def get_components(path, layer, ignore=None):
     for footprint in pcb.footprint:
         if footprint.layer.replace('"', '') == layer:
             package = footprint[0].replace('"', '')
-            pos = footprint.at[0:2]
+            pos = (footprint.at[0], -footprint.at[1])
             if len(footprint.at) == 3:
                 rot = footprint.at[2]
             else:
