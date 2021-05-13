@@ -217,7 +217,7 @@ def make_bom(parts, path='bom.xlsx'):
             pass
 
         name_list = []
-        for n in data['parts']:
+        for n in sorted(data['parts'], key=lambda x: x[0]):
             name_list.append(n[0])
 
         bom.write('A'+str(line), value)
@@ -242,7 +242,7 @@ def make_cpl(parts, path='cpm.xlsx'):
 
     line = 2
     for part, data in parts.items():
-        for n in data['parts']:
+        for n in sorted(data['parts'], key=lambda x: x[0]):
 
             x = round(float(n[2][0]), 3)
             y = round(float(n[2][1]), 3)
