@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from argparse import ArgumentParser
+from os.path import splitext, basename
 from lib import *
-
 
 parser = ArgumentParser(
     description='Generate JLCPCB bom and cpl files from a Kicad PCB project')
@@ -30,9 +30,11 @@ if __name__ == '__main__':
     if args.offline:
         db = jlc.load_db()
 
+    base_name = splitext(basename(args.project))[0]
+
     for layer in ('top', 'bottom'):
         components = kicad.get_components(args.project, layer, args.ignore)
         parts = jlc.search(components, database=db, nostock=args.nostock, match=args.match)
         
-        jlc.make_bom(parts, layer + '-bom.xlsx')
-        jlc.make_cpl(parts, layer + '-cpl.xlsx')
+        jlc.make_bom(parts, '{0}-{1}-bom.xlsx'.format(base_name, layer))
+        jlc.make_bom(parts, '{0}-{1}-cpl.xlsx'.format(base_name, layer))

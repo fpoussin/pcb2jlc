@@ -125,6 +125,9 @@ def get_components(path, layer, ignore=None):
             rot += 180
             rot %= 360
 
+            if layer == 'bottom':
+                rot = -rot
+
             if (not lcsc_pn and ignore and re.match(ignore, name)) or re.match('^N[CBP]$', value):
                 ignored_parts.append(name)
                 continue
