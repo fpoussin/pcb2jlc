@@ -38,4 +38,4 @@ if __name__ == '__main__':
         parts = jlc.search(components, database=db, nostock=args.nostock, match=args.match)
         
         jlc.make_bom(parts, '{0}-{1}-bom.xlsx'.format(base_name, layer))
-        jlc.make_bom(parts, '{0}-{1}-cpl.xlsx'.format(base_name, layer))
+        jlc.make_cpl(parts, '{0}-{1}-cpl.xlsx'.format(base_name, layer))
