@@ -92,7 +92,7 @@ def get_components(path, layer, ignore=None):
     elif layer == 'bottom':
         kicad_layer = 'B.Cu'
     else:
-        print('Unkown layer')
+        print('Unknown layer:', layer)
         exit(1)
 
     compos = {}

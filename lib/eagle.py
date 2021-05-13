@@ -5,7 +5,11 @@ import xml.etree.ElementTree as ET
 import re
 
 def get_components(path, layer, ignore=None):
-    
+
+    if layer not in ('top', 'bottom'):
+        print('Unknown layer:', layer)
+        exit(1)
+
     compos = {}
     layers = {}
     board = ET.parse('{}'.format(path))
