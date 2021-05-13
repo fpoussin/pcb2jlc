@@ -244,9 +244,12 @@ def make_cpl(parts, path='cpm.xlsx'):
     for part, data in parts.items():
         for n in data['parts']:
 
+            x = round(float(n[2][0]), 3)
+            y = round(float(n[2][1]), 3)
+
             cpl.write('A'+str(line), n[0])
-            cpl.write('B'+str(line), str(n[2][0])+'mm')
-            cpl.write('C'+str(line), str(n[2][1])+'mm')
+            cpl.write('B'+str(line), '{:.3f}mm'.format(x))
+            cpl.write('C'+str(line), '{:.3f}mm'.format(y))
             cpl.write('D'+str(line), n[1].lower())
             cpl.write('E'+str(line), n[3])
             line += 1
