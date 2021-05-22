@@ -50,6 +50,8 @@ def get_components(path, layer, ignore=None):
                 value = value.replace('R', 'Ω')
             elif re.search(r'\d+R\d+', value, re.M):
                 value = value.replace('R', '.')
+            if not value.endswith('Ω') and not value.endswith('%'):
+                    value += 'Ω'
         elif re.search(r'^L\d{4,5}', package, re.M):
             package = package[1:]
             desc = 'INDUCTOR'

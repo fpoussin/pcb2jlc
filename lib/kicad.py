@@ -114,7 +114,7 @@ def get_components(path, layer, ignore=None):
                     if p[idx] == 'reference':
                         name = p[idx+1].replace('"', '')
                     elif p[idx] == 'value':
-                        value = p[idx+1].replace('"', '')
+                        value = p[idx+1].replace('"', '').upper()
             for p in footprint.property:
                 p = [x.replace('"', '') for x in p]
                 if 'LCSC' in p[0].upper():
@@ -146,6 +146,8 @@ def get_components(path, layer, ignore=None):
                     value = value.replace('R', 'Ω')
                 elif re.search(r'\d+R\d+', value, re.M):
                     value = value.replace('R', '.')
+                if not value.endswith('Ω') and not value.endswith('%'):
+                    value += 'Ω'
             elif re.search(r'^Inductor.*L_.*\d{4}', package, re.M):
                 m = re.search(r'^Inductor.*L_.*(\d{4})', package, re.M)
                 if m:

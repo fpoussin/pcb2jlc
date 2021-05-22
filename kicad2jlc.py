@@ -33,6 +33,7 @@ if __name__ == '__main__':
     base_name = splitext(basename(args.project))[0]
 
     for layer in ('top', 'bottom'):
+        print('**', layer, 'layer **')
         components = kicad.get_components(args.project, layer, args.ignore)
         parts = jlc.search(components, database=db, nostock=args.nostock, match=args.match)
         

@@ -7,6 +7,7 @@ import json
 import time
 import gzip
 import os
+import re
 
 
 DB_FILE = 'jlcdb.json.gz'
@@ -139,17 +140,31 @@ def search(compos: dict(), database=None, nostock=False, match=False):
         # Skip the rest if we are in strict matching mode or already found it using part code
         if not match and not found:
             for entry in parts:
+                desc = entry['describe'].upper().split(' ')
+                reference = entry['componentModelEn'].upper()
+
+                # Fix missing ohms symbol
+                if 'RESISTOR' in desc or 'RESISTORS' in desc:
+                    for i in range(len(desc)):
+                        desc[i] = desc[i].replace('OHMS', 'Ω')
+                        if re.match('\d+[KM]$', desc[i], re.M):
+                            desc[i] += 'Ω'
+                        elif re.match('±\d%$', desc[i], re.M):
+                            desc[i] = desc[i][1:]
+
                 # Ignore if the required quantity isn't available
                 if entry['stockCount'] < len(names) and nostock == False:
                     continue
                 if package and package not in entry['describe'] and package != entry['componentSpecificationEn'].upper():
                     continue
                 all_words_found = True
-                for word in value.split(' '):
-                    if word.upper() not in entry['describe'].upper():
+                # Check all words are found in description
+                for word in value.strip().split(' '):
+                    if word.upper() not in desc:
                         all_words_found = False
                         break
-                if not all_words_found and value not in entry['componentModelEn'].upper():
+                # Check part reference if not found with description (used for ICs most of the time)
+                if not all_words_found and value not in reference:
                     continue
 
                 v['jlc']['desc'] = entry['describe']
