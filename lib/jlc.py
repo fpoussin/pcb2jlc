@@ -95,10 +95,9 @@ def search(compos: dict(), database=None, nostock=False, match=False):
             if lcscpn:
                 keyword = lcscpn
             else:
-                keyword = ''
+                keyword = '{} '.format(value)
                 if package:
                     keyword += '{} '.format(package)
-                keyword += '{}'.format(value)
             keyword = keyword.strip()
 
             if not keyword:
@@ -146,10 +145,12 @@ def search(compos: dict(), database=None, nostock=False, match=False):
                 # Fix missing ohms symbol
                 if 'RESISTOR' in desc or 'RESISTORS' in desc:
                     for i in range(len(desc)):
-                        desc[i] = desc[i].replace('OHMS', 'Ω')
-                        if re.match('\d+[KM]$', desc[i], re.M):
-                            desc[i] += 'Ω'
-                        elif re.match('±\d%$', desc[i], re.M):
+                        # Add/fix ohm symbol to part description if present in component value
+                        if 'Ω' in value or 'OHM' in value.upper():
+                            desc[i] = desc[i].upper().replace('OHMS', 'Ω')
+                        else: # Strip ohm symbol from part description if missing from component value
+                            desc[i] = desc[i].upper().replace('OHMS', '').replace('Ω', '')
+                        if re.match('±\d%$', desc[i], re.M):
                             desc[i] = desc[i][1:]
 
                 # Ignore if the required quantity isn't available
