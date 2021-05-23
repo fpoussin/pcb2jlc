@@ -46,8 +46,9 @@ def update_db():
                             if data_len:
                                 for part in data:
                                     if not len(part['componentPrices']):
-                                        part['componentPrices'] = [{'productPrice': 0}]
-                                subcat_data += data
+                                        continue
+                                    part['componentPrices'] = sorted(part['componentPrices'], key=lambda x: x['startNumber'])
+                                    subcat_data.append(part)
                                 if data_len < step:
                                     break
                                 page += 1
@@ -116,7 +117,8 @@ def search(compos: dict(), database=None, nostock=False, match=False):
             r_data = []
             for part in r.json()['data']['list']:
                 if not len(part['componentPrices']):
-                    part['componentPrices'] = [{'productPrice': 0}]
+                    continue
+                part['componentPrices'] = sorted(part['componentPrices'], key=lambda x: x['startNumber'])
                 r_data.append(part)
             parts = sorted(r_data, key=lambda x: x['componentPrices'][0]['productPrice'])
             print(len(parts) or 'Not', 'found')
