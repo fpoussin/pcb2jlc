@@ -1,10 +1,10 @@
-# jlcpcb-scripts
+# pcb2jlc
 
 A collection of scripts to generate BOM and CPL files for the JLCPCB assembly service
 
 Currently supports:
 * Eagle 6.x+
-* Kicad 5.x+
+* Kicad 6.x+
 
 These scripts will query the JLC online database for each part, checking stock and sorting by cheapest price.  
 It can also save the whole database locally for faster generation if your connection is slow.  
