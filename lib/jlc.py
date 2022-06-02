@@ -41,7 +41,7 @@ def update_db():
                     r = requests.post(API, json={'currentPage': page, 'pageSize': step, 'searchSource': 'search', 'firstSortName': '', 'secondeSortName': subCategoryName})
                     if r.status_code == 200:
                         try:
-                            data = r.json()['data']['list']
+                            data = r.json()['data']['componentPageInfo']['list']
                             data_len = len(data)
                             if data_len:
                                 for part in data:
@@ -115,7 +115,7 @@ def search(compos: dict(), database=None, nostock=False, match=False):
                          'stockFlag': not nostock}
             r = requests.post(API, json=post_data, headers={'content-type': 'application/json', 'referer': 'https://jlcpcb.com/parts/componentSearch'})
             r_data = []
-            for part in r.json()['data']['list']:
+            for part in r.json()['data']['componentPageInfo']['list']:
                 if not len(part['componentPrices']):
                     continue
                 part['componentPrices'] = sorted(part['componentPrices'], key=lambda x: x['startNumber'])
