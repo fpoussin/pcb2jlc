@@ -13,3 +13,8 @@ You can add the `LCSC` property to your components to specify a part number.
 By default, package, value and type will be used to search for a part.  
 
 You can offset the rotation of a part with the `ROT` property. 
+
+## Requirements
+
+You will need Python 3 and `pip`  
+Required python packages can be installed using pip: `pip3 install -r requirements.txt`
