@@ -37,7 +37,7 @@ class KicadPCB_module(SexpParser):
     _default_bools = 'locked'
     _parse_fp_text = KicadPCB_gr_text
     _parse_pad = KicadPCB_pad
-    
+
 
 class KicadPCB(SexpParser):
 
@@ -148,8 +148,8 @@ def get_components(path, layer, ignore=None):
                     value = value.replace('R', '.')
                 if not value.endswith('Ω') and not value.endswith('%'):
                     value += 'Ω'
-            elif re.search(r'^Inductor.*L_.*\d{4}', package, re.M):
-                m = re.search(r'^Inductor.*L_.*(\d{4})', package, re.M)
+            elif re.search(r'^Inductor.*L_\d{4}', package, re.M):
+                m = re.search(r'^Inductor.*L_(\d{4})_\d+', package, re.M)
                 if m:
                     package = m.group(1)
                 desc = 'INDUCTOR'
@@ -169,8 +169,15 @@ def get_components(path, layer, ignore=None):
             elif re.search(r'^D\d+', name, re.M):
                 package = package.split(':')[1].split('_')[1]
                 desc = 'DIODE'
+            elif re.search(r'^FL\d+', name, re.M):
+                package = package.split(':')[1].split('_')[1]
+                desc = 'FILTER'
             else:
-                package = package.split(':')[1]
+                m = re.search(r'^.+_(\d{4})', package, re.M)
+                if m:
+                    package = m.group(1)
+                else:
+                    package = package.split(':')[1]
 
             if value and package:
                 index = (str(value), package, lcsc_pn)
