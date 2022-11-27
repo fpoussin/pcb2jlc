@@ -81,7 +81,7 @@ def load_db():
     return database
 
 
-def search(compos: dict(), database=None, nostock=False, match=False):
+def search(compos: dict(), database=None, nostock=False, strict=False, basic=False, limit=4):
     missing = list()
     bom = list()
     for c, v in compos.items():
@@ -104,30 +104,44 @@ def search(compos: dict(), database=None, nostock=False, match=False):
             if not keyword:
                 continue
 
-            print('Searching for', keyword, '... ', end="", flush=True)
+            print('Searching for', keyword, end=" ", flush=True)
 
-            post_data = {'keyword': keyword,
-                         'firstSortName': '',
-                         'secondeSortName': '',
-                         'currentPage': 1, 
-                         'pageSize': 100,
-                         'searchSource': 'search',
-                         'stockFlag': not nostock}
-            r = requests.post(API, json=post_data, headers={'content-type': 'application/json', 'referer': 'https://jlcpcb.com/parts/componentSearch'})
-            r_data = []
-            for part in r.json()['data']['componentPageInfo']['list']:
-                if not len(part['componentPrices']):
-                    continue
-                part['componentPrices'] = sorted(part['componentPrices'], key=lambda x: x['startNumber'])
-                r_data.append(part)
-            parts = sorted(r_data, key=lambda x: x['componentPrices'][0]['productPrice'])
-            print(len(parts) or 'Not', 'found')
+            parts = []
+            page = 1
+            while True:
+                print('.', end="", flush=True)
+                post_data = {'keyword': keyword,
+                            'firstSortName': '',
+                            'secondeSortName': '',
+                            'currentPage': page, 
+                            'pageSize': 100,
+                            'searchSource': 'search',
+                            'stockFlag': not nostock,
+                            'componentLibraryType': 'base' if basic else '',
+                            'stockSort': 'true'}
+                r = requests.post(API, json=post_data, headers={'content-type': 'application/json', 'referer': 'https://jlcpcb.com/parts/componentSearch'})
+                r_data = []
+                json_data = r.json()['data']
+                for part in json_data['componentPageInfo']['list']:
+                    if not len(part['componentPrices']):
+                        continue
+                    part['componentPrices'] = sorted(part['componentPrices'], key=lambda x: x['startNumber'])
+                    r_data.append(part)
+                parts += r_data
+                # Loop if page is full
+                if len(r_data) < 100 or page > limit:
+                    break
+                page += 1
+            if parts:
+                # Sort by unit price
+                parts = sorted(parts, key=lambda x: x['componentPrices'][0]['productPrice'])
+            print('', len(parts) or ' Not', 'found')
         else:
             parts = database
 
         found = False
         for entry in parts:
-            # Check part number (LCSC# property) before anything else
+            # Check part number (LCSC property) before anything else
             if lcscpn == entry['componentCode']:
                 v['jlc']['desc'] = entry['describe']
                 v['jlc']['code'] = entry['componentCode']
@@ -139,7 +153,7 @@ def search(compos: dict(), database=None, nostock=False, match=False):
                 break
 
         # Skip the rest if we are in strict matching mode or already found it using part code
-        if not match and not found:
+        if not strict and not found:
             for entry in parts:
                 desc = entry['describe'].upper().split(' ')
                 reference = entry['componentModelEn'].upper()

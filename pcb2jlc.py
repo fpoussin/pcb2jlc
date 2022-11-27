@@ -12,7 +12,7 @@ parser.add_argument('-u', '--update', action='store_true',
                     help='Update JLCPCB component database')
 parser.add_argument('-o', '--offline', action='store_true',
                     help='Use offline database')
-parser.add_argument('-m', '--match', action='store_true',
+parser.add_argument('-s', '--strict', action='store_true',
                     help='Only use LCSC attribute')
 parser.add_argument('-n', '--nostock', action='store_true',
                     help='Select part even if no stock')
@@ -41,7 +41,7 @@ if __name__ == '__main__':
         else:
             print('Unknown board file extension, use --help')
             exit(1)
-        parts = jlc.search(components, database=db, nostock=args.nostock, match=args.match)
+        parts = jlc.search(components, database=db, nostock=args.nostock, strict=args.strict)
         
         jlc.make_bom(parts, '{0}-{1}-bom.xlsx'.format(base_name, layer))
         jlc.make_cpl(parts, '{0}-{1}-cpl.xlsx'.format(base_name, layer))
