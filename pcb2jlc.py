@@ -42,6 +42,9 @@ if __name__ == '__main__':
             print('Unknown board file extension, use --help')
             exit(1)
         parts = jlc.search(components, database=db, nostock=args.nostock, strict=args.strict)
+
+        if not parts:
+            continue
         
         jlc.make_bom(parts, '{0}-{1}-bom.xlsx'.format(base_name, layer))
         jlc.make_cpl(parts, '{0}-{1}-cpl.xlsx'.format(base_name, layer))

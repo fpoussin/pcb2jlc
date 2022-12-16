@@ -81,7 +81,7 @@ def load_db():
     return database
 
 
-def search(compos: dict(), database=None, nostock=False, strict=False, basic=False, limit=4):
+def search(compos: dict(), database=None, nostock=False, strict=False, basic=False, limit=10):
     missing = list()
     bom = list()
     for c, v in compos.items():
