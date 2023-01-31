@@ -98,6 +98,7 @@ def get_components(path, layer, ignore=None):
     compos = {}
     ignored_parts = []
     for footprint in pcb.footprint:
+        if not hasattr(footprint, 'property'): continue
         if footprint.layer.replace('"', '') == kicad_layer:
             package = footprint[0].replace('"', '')
             if layer == 'top':
