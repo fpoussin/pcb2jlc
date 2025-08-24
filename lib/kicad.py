@@ -49,7 +49,9 @@ def get_components(path, layer, ignore=None):
             if layer == 'bottom':
                 rot = -rot
 
-            if (not lcsc_pn and ignore and re.match(ignore, name)) or re.match('^N[CBP]$', value) or footprint.attributes.excludeFromBom:
+            if (not lcsc_pn and ignore and re.match(ignore, name)) \
+            or re.match('^N[CBP]$', value) \
+            or footprint.attributes.excludeFromBom or footprint.attributes.doNotPopulate:
                 ignored_parts.append(name)
                 continue
 
