@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/bin/env python3
 # -*- coding: utf-8 -*-
 
 import xlsxwriter
@@ -12,12 +12,7 @@ import re
 
 DB_FILE = 'jlcdb.json.gz'
 
-CATEGORIES = 'https://jlcpcb.com/componentSearch/getFirstSortAndChilds'
-SORT = 'https://jlcpcb.com/componentSearch/getSortAndCount'
-
-API = 'https://jlcpcb.com/shoppingCart/smtGood/selectSmtComponentList'
-DB_URL = 'https://jlcpcb.com/componentSearch/uploadComponentInfo'
-PN_ULR = 'https://jlcpcb.com/shoppingCart/smtGood/getComponentDetail?componentCode='
+API = 'https://jlcpcb.com/api/overseas-pcb-order/v1/shoppingCart/smtGood/selectSmtComponentList/v2'
 
 
 def update_db():
@@ -25,10 +20,10 @@ def update_db():
     database = []
 
     step = 100
-    r = requests.post(CATEGORIES, json={})
+    r = requests.post(API, json={"searchType": 1, "pageSize": 0})
     if r.status_code == 200:
         categories = r.json()
-        for category in categories:
+        for category in categories['data']['sortAndCountVoList']:
             cat_data = []
             print('Importing', category['sortName'])
             for subcategory in category['childSortList']:
@@ -81,7 +76,7 @@ def load_db():
     return database
 
 
-def search(compos: dict(), database=None, nostock=False, strict=False, basic=False, limit=10):
+def search(compos:dict, database:bool = None, nostock:bool = False, strict:bool = False, basic:bool = False, limit:int = 1):
     missing = list()
     bom = list()
     for c, v in compos.items():
@@ -119,17 +114,23 @@ def search(compos: dict(), database=None, nostock=False, strict=False, basic=Fal
                             'stockFlag': not nostock,
                             'componentLibraryType': 'base' if basic else '',
                             'stockSort': 'true'}
-                r = requests.post(API, json=post_data, headers={'content-type': 'application/json', 'referer': 'https://jlcpcb.com/parts/componentSearch'})
+                r = requests.post(API, json=post_data, headers={'content-type': 'application/json', 'referer': 'https://jlcpcb.com/parts/basic_parts'})
+                if r.status_code != 200:
+                    print(' Request failed:', r.status_code)
+                    break
                 r_data = []
                 json_data = r.json()['data']
-                for part in json_data['componentPageInfo']['list']:
-                    if not len(part['componentPrices']):
-                        continue
-                    part['componentPrices'] = sorted(part['componentPrices'], key=lambda x: x['startNumber'])
-                    r_data.append(part)
+                try:
+                    for part in json_data['componentPageInfo']['list']:
+                        if not len(part['componentPrices']):
+                            continue
+                        part['componentPrices'] = sorted(part['componentPrices'], key=lambda x: x['startNumber'])
+                        r_data.append(part)
+                except (TypeError, KeyError):
+                    break
                 parts += r_data
                 # Loop if page is full
-                if len(r_data) < 100 or page > limit:
+                if len(r_data) < 100 or page >= limit:
                     break
                 page += 1
             if parts:

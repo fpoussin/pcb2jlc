@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/bin/env python3
 # -*- coding: utf-8 -*-
 
 from argparse import ArgumentParser
@@ -41,7 +41,9 @@ if __name__ == '__main__':
         else:
             print('Unknown board file extension, use --help')
             exit(1)
-        parts = jlc.search(components, database=db, nostock=args.nostock, strict=args.strict)
+
+        print('getting components...')
+        parts = jlc.search(components, database=db, nostock=args.nostock, strict=args.strict, limit=1)
 
         if not parts:
             continue
