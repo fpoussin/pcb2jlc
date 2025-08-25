@@ -67,7 +67,7 @@ def update_db():
 		database[i['componentCode']] = i
 
 	with gzip.open(DB_FILE, 'w') as f:
-		f.write(msgspec.json.encode(database))
+		f.write(msgspec.msgpack.encode(database))
 
 
 def load_db():
@@ -75,7 +75,7 @@ def load_db():
 		print('Database not found, ignoring')
 		return {}
 	with gzip.open(DB_FILE, 'r') as f:
-		database = msgspec.json.decode(f.read())
+		database = msgspec.msgpack.decode(f.read())
 		print('loaded {0} components from database'.format(len(database)))
 	return database
 
@@ -142,7 +142,7 @@ def search(compos:dict, database:bool = None, use_cache:bool = False, nostock:bo
 		
 	try:
 		with gzip.open(CACHE_FILE, 'r') as f:
-			cache = msgspec.json.decode(f.read())
+			cache = msgspec.msgpack.decode(f.read())
 		print('loaded {0} components from cache'.format(len(cache)))
 	except (FileNotFoundError, msgspec.DecodeError):
 		print('No cache found')
@@ -215,7 +215,7 @@ def search(compos:dict, database:bool = None, use_cache:bool = False, nostock:bo
 						parts = {p['componentCode']:p for p in tmp_parts}
 						cache = cache | parts
 						with gzip.open(CACHE_FILE, 'w+') as f:
-							f.write(msgspec.json.encode(cache))
+							f.write(msgspec.msgpack.encode(cache))
 						v['jlc'] = _verify(lcscpn, parts, names, value, package, nostock, strict)
 					print('', len(tmp_parts) or ' Not', 'found')
 		else:
